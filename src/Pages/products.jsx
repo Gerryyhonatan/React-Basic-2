@@ -2,38 +2,27 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import Button from "../components/Elements/Button";
 import CardProduct from "../components/Fragments/CardProduct";
 import Counter from "../components/Fragments/Counter";
-
-const products = [
-  {
-    id: 1,
-    name: "Sepatu Baru",
-    price: 1000000,
-    image: "/images/Product1.jpg",
-    description: "Lorem ipsum dolor sit amet.",
-  },
-  {
-    id: 2,
-    name: "Sepatu Lama",
-    price: 500000,
-    image: "/images/Product1.jpg",
-    description:
-      "Lorem ipsum dolor sit amet. lorem lorem lorem lorem lorem lorem lorem lorem lorem",
-  },
-];
+import { getProducts } from "../services/product.service";
 
 const email = localStorage.getItem("email");
 
 const ProductsPage = () => {
   const [cart, setCart] = useState([]);
-
   const [totalPrice, setTotalPrice] = useState(0);
+  const [products, setProducts] = useState([])
 
   useEffect(() => {
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
   }, []);
 
   useEffect(() => {
-    if(cart.length > 0) {
+    getProducts((data) => {
+      setProducts(data);
+    });
+  }, [])
+
+  useEffect(() => {
+    if(products.length > 0 && cart.length > 0) {
       const sum = cart.reduce((acc, item) => {
         const product = products.find((product) => product.id === item.id);
         return acc + product.price * item.quantity;
@@ -41,7 +30,7 @@ const ProductsPage = () => {
       setTotalPrice(sum);
       localStorage.setItem("cart", JSON.stringify(cart));
     }
-  }, [cart]);
+  }, [cart, products]);
 
   const handleLogout = () => {
     localStorage.removeItem("email");
@@ -62,17 +51,17 @@ const ProductsPage = () => {
   };
 
   // useRef
-  const cartRef = useRef([
-    {
-      id: 1,
-      quantity: 1,
-    }
-  ]);
+  // const cartRef = useRef([
+  //   {
+  //     id: 1,
+  //     quantity: 1,
+  //   }
+  // ]);
 
-  const handleAddToCartRef = (id) => {
-    cartRef.current = [...cartRef.current, {id, quantity: 1}];
-    localStorage.setItem("cart", JSON.stringify(cartRef.current));
-  }
+  // const handleAddToCartRef = (id) => {
+  //   cartRef.current = [...cartRef.current, {id, quantity: 1}];
+  //   localStorage.setItem("cart", JSON.stringify(cartRef.current));
+  // }
 
   const totalPriceRef = useRef(null);
   useEffect(() => {
@@ -93,10 +82,10 @@ const ProductsPage = () => {
       </div>
       <div className="flex justify-center py-5">
         <div className="w-4/6 flex flex-wrap">
-          {products.map((product) => (
+          { products.length > 0 && products.map((product) => (
             <CardProduct key={product.id}>
               <CardProduct.Header image={product.image} />
-              <CardProduct.Body name={product.name}>
+              <CardProduct.Body name={product.title}>
                 {product.description}
               </CardProduct.Body>
               <CardProduct.Footer
@@ -119,24 +108,24 @@ const ProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {cart.map((item) => {
+              {products.length > 0 && cart.map((item) => {
                 const product = products.find(
                   (product) => product.id === item.id
                 );
                 return (
                   <tr key={item.id}>
-                    <td>{product.name}</td>
+                    <td>{product.title.substring(0, 10)} ...</td>
                     <td>
                       {product.price.toLocaleString("id-ID", {
                         style: "currency",
-                        currency: "IDR",
+                        currency: "USD",
                       })}
                     </td>
                     <td>{item.quantity}</td>
                     <td>
                       {(item.quantity * product.price).toLocaleString("id-ID", {
                         style: "currency",
-                        currency: "IDR",
+                        currency: "USD",
                       })}
                     </td>
                   </tr>
@@ -150,7 +139,7 @@ const ProductsPage = () => {
                   <b>
                     {totalPrice.toLocaleString("id-ID", {
                       style: "currency",
-                      currency: "IDR",
+                      currency: "USD",
                     })}
                   </b>
                 </td>
