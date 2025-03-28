@@ -1,13 +1,15 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import CardProduct from "../components/Fragments/CardProduct";
 import { getProducts } from "../services/product.service";
 import { useLogin } from "../hooks/useLogin";
 import TableCart from "../components/Fragments/TableCart";
 import Navbar from "../components/Layouts/Navbar";
+import { DarkMode } from "../context/DarkMode";
 
 
 
 const ProductsPage = () => {
+  const {isDarkMode} = useContext(DarkMode)
   const [products, setProducts] = useState([])
   useLogin();
 
@@ -21,7 +23,8 @@ const ProductsPage = () => {
 
   return (
     <Fragment>
-      <div className="flex justify-center py-5">
+      <Navbar/>
+      <div className={`flex justify-center py-5 ${isDarkMode && "bg-slate-800"}`}>
         <div className="w-4/6 flex flex-wrap">
           { products.length > 0 && products.map((product) => (
             <CardProduct key={product.id}>
